@@ -1,11 +1,11 @@
 /*    ############################################################
- *    #  Last updated: 26/08/2017                                #
- *    #  New features: Min amount to withdraw, withdraw options  #
- *    #                Conversions to the bigger/smaller notes,  #
- *    #                Removed goto jumper ;), notifications,    #
- *    #                and formatting.                           #
- *    #  Version: 2.0                                            #
- *    #  Author: Saidmamad Gulomshoev                            #
+ *    #  Last updated: 31/08/2017                                #
+ *    #  New features: Checking balance in USD, Rs, and TJS cur. #
+ *    #                Exception handling in case of entering    #
+ *    #                empty choice, rounding currencies         #
+ *    #                                                          #
+ *    #  Version: 2.1                                            #
+ *    #  Author:  Saidmamad Gulomshoev                           #
  *    #  License: MIT License                                    #
  *    ############################################################
  */
@@ -20,57 +20,81 @@ namespace ATMApplication
     class ATM
     {
         public static Decimal balance = 0;
-        public static Decimal withdrawAmount=0;
+        public static Decimal withdrawAmount = 0;
         public static Decimal depositAmount;
-   
-        static void CheckBalance() {
-            Console.WriteLine("\nYour balance: Rs " + convertToBiggestNote(balance));
+
+        static void CheckBalance()
+        {
+            int note;
+            Console.WriteLine("Select the currency: \n 1 - Rs \n 2 - TJS \n 3 - USD");
+            Console.Write("Currency: ");
+            note = int.Parse(Console.ReadLine());
+            switch(note){
+                case 1:
+                    Console.WriteLine("\nYour current balance: Rs " + convertToBiggestNote(balance));
+                    break;
+                case 2:
+                    Console.WriteLine("\nYour current balance: TJS " + Math.Round((convertToBiggestNote(balance) / 7), 2, MidpointRounding.AwayFromZero));
+                    break;
+                case 3:
+                    Console.WriteLine("\nYour current balance: USD " + Math.Round((convertToBiggestNote(balance) / 64), 2, MidpointRounding.AwayFromZero));
+                    break;
+
+                default:
+                    Console.WriteLine("\n Incorrect value! Please select any one of the above options. ");
+                    break;
+
+            
+            }
+            
         }
 
-        
-        static Decimal withdrawIfAvailable(Decimal balance, Decimal withdrawAmount) {
+
+        static Decimal withdrawIfAvailable(Decimal balance, Decimal withdrawAmount)
+        {
 
             if (withdrawAmount > balance)
             {
                 Console.WriteLine("\nSorry! Unsuficient balance!");
             }
-            
-            else if(withdrawAmount < 1000) 
+
+            else if (withdrawAmount < 1000)
             {
                 Console.WriteLine("Minimum amount possible to be withdrawn is Rs 10. \n");
             }
-            
-            else 
+
+            else
             {
                 balance -= withdrawAmount;
                 Console.WriteLine("Please collect your cash! ");
             }
             return balance;
-         }
+        }
 
-        
+
         static Decimal WithdrawMoney()
         {
             int options;
             Console.WriteLine("Select an option: ");
-            Console.WriteLine(" 1 - 50 \n 2 - 100 \n 3 - 500 \n 4 - Enter manually \n 0 - Back to main options ");
+            Console.WriteLine(" 1 - Rs 50 \n 2 - Rs 100 \n 3 - Rs 500 \n 4 - Enter manually \n 0 - Back to main options ");
             Console.Write("Option: ");
             options = int.Parse(Console.ReadLine());
-         
 
-            switch (options) { 
+
+            switch (options)
+            {
                 case 1:
                     withdrawAmount = 5000;
                     balance = withdrawIfAvailable(balance, withdrawAmount);
                     return balance;
-                    
+
                 case 2:
                     withdrawAmount = 10000;
                     balance = withdrawIfAvailable(balance, withdrawAmount);
                     return balance;
 
                 case 3:
-                    withdrawAmount = 50000; 
+                    withdrawAmount = 50000;
                     balance = withdrawIfAvailable(balance, withdrawAmount);
                     return balance;
                 case 4:
@@ -91,7 +115,8 @@ namespace ATMApplication
         }
 
 
-        static Decimal convertToSmallestNote(Decimal bigNote) {
+        static Decimal convertToSmallestNote(Decimal bigNote)
+        {
             return bigNote * 100;
 
         }
@@ -99,61 +124,68 @@ namespace ATMApplication
 
         static Decimal convertToBiggestNote(Decimal smallNote)
         {
-            Decimal bigNote = smallNote / 100;
-            return bigNote;
-
+            return smallNote / 100;
         }
 
 
-        static void Deposit() {
+        static void Deposit()
+        {
             Console.Write("\nPlease enter the amount to deposit: ");
             depositAmount = Decimal.Parse(Console.ReadLine());
             depositAmount = convertToSmallestNote(depositAmount);
-            //Console.WriteLine("Converted to the smallest note: " + depositAmount);
             balance += depositAmount;
             Console.WriteLine("\nYour money has been deposited to your account. \nYour current balance is Rs. {0}.\n", convertToBiggestNote(balance));
         }
 
-
-        static void validPIN() {
+        static void validPIN()
+             
+        {
             int choice;
             while (true)
             {
                 Console.WriteLine("\nPlease enter the operation mode: ");
                 Console.WriteLine(" 1 - To check your balance \n 2 - To withdraw money \n 3 - To deposit money \n 0 - To exit ");
                 Console.Write("Operation mode: ");
-                choice = Convert.ToInt32(Console.ReadLine());
-
-                switch (choice)
+                try
                 {
-                    case 1:
-                        CheckBalance();
-                        break;
+                    choice = Convert.ToInt32(Console.ReadLine());
+                    switch (choice)
+                    {
+                        case 1:
+                            CheckBalance();
+                            break;
 
-                    case 2:
-                        WithdrawMoney();
-                        break;
+                        case 2:
+                            WithdrawMoney();
+                            break;
 
-                    case 3:
-                        Deposit();
-                        break;
+                        case 3:
+                            Deposit();
+                            break;
 
-                    case 0:
-                        //Close the program
-                        return;
+                        case 0:
+                            //Close the program
+                            Console.WriteLine("Thank you for banking with us!");
+                            return;
 
-                    default:
-                        Console.WriteLine("\nInvalid choice!");
-                        break;
+                        default:
+                            Console.WriteLine("\nInvalid choice!");
+                            break;
+                    }
                 }
+                catch (Exception) {
+                    Console.WriteLine("\nYou didn't enter any option. Please enter an  operation mode. ");
+                }
+                
             }
-         }
+           
+        }
 
 
         static void Main(string[] argg)
         {
             int PIN;
-   
+
             int pinTryNumber = 1;
             Console.WriteLine("Welcome to State Bank of India! ");
             Console.WriteLine("Please insert your card!\n");
@@ -184,12 +216,13 @@ namespace ATMApplication
 
                     pinTryNumber++;
 
-                    Console.WriteLine("\n\nYou exceeded the number of tries! Your card has been blocked! \nContact your branch office for further information!");
-                }
+                    }
+                Console.WriteLine("\n\nYou exceeded the number of tries! Your card has been blocked! \nContact your branch office for further information!");
+                
 
             }
 
-            Console.WriteLine("Thank you for banking with us!");
+            
             Console.ReadKey();
         }
     }
