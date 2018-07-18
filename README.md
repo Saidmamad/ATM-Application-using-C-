@@ -1,4 +1,4 @@
-This ATM program is written in CSharp. It uses console to run the application.
+This ATM program is written in CSharp. It uses console to run the application.. 
 
 The features of the program are as follow:
 
